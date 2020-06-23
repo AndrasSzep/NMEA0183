@@ -377,7 +377,31 @@ inline bool NMEA0183ParseMTW(const tNMEA0183Msg &NMEA0183Msg,double &WaterTemper
 }
 
 bool NMEA0183SetMTW(tNMEA0183Msg &NMEA0183Msg, double WaterTemperature);
+
 //*****************************************************************************
+// MTW - Water Temperature
+bool NMEA0183ParseDPT_nc(const tNMEA0183Msg &NMEA0183Msg,double &WaterDepth, double &Offset, double &Range);
+
+inline bool NMEA0183ParseDPT(const tNMEA0183Msg &NMEA0183Msg,double &WaterDepth, double &Offset, double &Range) {
+  return (NMEA0183Msg.IsMessageCode("DPT")
+            ?NMEA0183ParseDPT_nc(NMEA0183Msg,WaterDepth, Offset, Range)
+            :false);
+}
+bool NMEA0183SetDPT(tNMEA0183Msg &NMEA0183Msg, double WaterDepth, double Offset, double Range);
+
+//*****************************************************************************
+// MWD - Wind Direction and Speed
+bool NMEA0183ParseMWD_nc(const tNMEA0183Msg &NMEA0183Msg, double &WindDirectionTrue, double &WindDirectionMagnetic, double &WindSpeedkn, double &WindSpeedms);
+
+inline bool NMEA0183ParseMWD(const tNMEA0183Msg &NMEA0183Msg, double &WindDirectionTrue, double &WindDirectionMagnetic, double &WindSpeedkn, double &WindSpeedms) {
+  return (NMEA0183Msg.IsMessageCode("MWD")
+            ?NMEA0183ParseMWD_nc(NMEA0183Msg,WindDirectionTrue,WindDirectionMagnetic,WindSpeedkn, WindSpeedms)
+            :false);
+}
+bool NMEA0183SetMWD(tNMEA0183Msg &NMEA0183Msg, double WindDirectionTrue, double WindDirectionMagnetic, double WindSpeedkn, double WindSpeedms);
+
+//*****************************************************************************
+
 // GSV - GPS Satellites in view
 bool NMEA0183SetGSV(tNMEA0183Msg &NMEA0183Msg, uint32_t totalMSG, uint32_t thisMSG, uint32_t SatelliteCount,
 					uint32_t PRN1, uint32_t Elevation1, uint32_t Azimuth1, uint32_t SNR1,

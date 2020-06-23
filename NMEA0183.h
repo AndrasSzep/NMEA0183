@@ -2,6 +2,7 @@
 NMEA0183.h
 
 Copyright (c) 2015-2019 Timo Lappalainen, Kave Oy, www.kave.fi
+mod by Dr.András Szép to include TCP stream handling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -69,9 +70,11 @@ class tNMEA0183
     // Call this in loop to read incoming messages or empty buffered sent messages.
     // For new messages message handler will be called.
     void ParseMessages();
+    void ParseTCPMessages(char *next_line, size_t len);    // parse TCP stream
     // You can also read incoming messages with GetMessage. Function
     // returns true, when there is valid message.
     bool GetMessage(tNMEA0183Msg &NMEA0183Msg);
+    bool GetTCPMessage(tNMEA0183Msg &NMEA0183Msg, char *next_line, size_t len);    // get a TCP stream line
     // Function will send message immediately of buffer it. Call ParseMessages()
     // in loop so that buffered messages will be sent.
     bool SendMessage(const tNMEA0183Msg &NMEA0183Msg);

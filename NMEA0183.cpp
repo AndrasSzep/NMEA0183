@@ -2,6 +2,7 @@
 NMEA0183.cpp
 
 Copyright (c) 2015-2019 Timo Lappalainen, Kave Oy, www.kave.fi
+mod by Dr.András Szép to include TCP stream handling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -204,3 +205,56 @@ bool tNMEA0183::SendMessage(const char *buf) {
   // Add check that there is crlf at end.
   return SendBuf(buf);
 }
+//*****************************************************************************
+void tNMEA0183::ParseTCPMessages(char *next_line, size_t len) {
+  tNMEA0183Msg NMEA0183Msg;
+
+//    if ( !Open() ) return;
+
+    if( GetTCPMessage(NMEA0183Msg, next_line, len) ){
+      if (MsgHandler!=0) {
+        MsgHandler(NMEA0183Msg);
+      }
+    }
+    kick();
+}
+
+//*****************************************************************************
+bool tNMEA0183::GetTCPMessage(tNMEA0183Msg &NMEA0183Msg, char *next_line, size_t len) {
+//  if ( !IsOpen() ) return false;
+
+  bool result=false;
+
+  for (size_t index =0; index < len; index++) {
+    int NewByte=next_line[index];
+      if (NewByte=='$' || NewByte=='!') { // Message start
+        MsgInStarted=true;
+        MsgInPos=0;
+        MsgInBuf[MsgInPos]=NewByte;
+        MsgInPos++;
+      } else if (MsgInStarted) {
+        MsgInBuf[MsgInPos]=NewByte;
+        if (NewByte=='*') MsgCheckSumStartPos=MsgInPos;
+        MsgInPos++;
+        if (MsgCheckSumStartPos!=SIZE_MAX and MsgCheckSumStartPos+3==MsgInPos) { // We have full checksum and so full message
+            MsgInBuf[MsgInPos]=0; // add null termination
+          if (NMEA0183Msg.SetMessage(MsgInBuf)) {
+            NMEA0183Msg.SourceID=SourceID;
+            result=true;
+          }
+          MsgInStarted=false;
+          MsgInPos=0;
+          MsgCheckSumStartPos=SIZE_MAX;
+        }
+        if (MsgInPos>=MAX_NMEA0183_MSG_BUF_LEN) { // Too may chars in message. Start from beginning
+          MsgInStarted=false;
+          MsgInPos=0;
+          MsgCheckSumStartPos=SIZE_MAX;
+        }
+      }
+  }
+
+  return result;
+}
+
+//*****************************************************************************

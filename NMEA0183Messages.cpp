@@ -741,6 +741,50 @@ bool NMEA0183SetMWV(tNMEA0183Msg &NMEA0183Msg, double WindAngle, tNMEA0183WindRe
 }
 
 //*****************************************************************************
+// MWD - Wind Direction and Speed
+//$WIMWD,276.2,T,276.2,M,4.7,N,2.4,M*5F
+bool NMEA0183ParseMWD_nc(const tNMEA0183Msg &NMEA0183Msg, double &WindDirectionTrue, double &WindDirectionMagnetic, double &WindSpeedkn, double &WindSpeedms) {
+  bool result=( NMEA0183Msg.FieldCount()>=7 );
+
+  if ( result ) {
+    switch ( NMEA0183Msg.Field(1)[0] ) {
+      case 'T' : WindDirectionTrue=atof(NMEA0183Msg.Field(0)); break;
+      case 'M' : WindDirectionMagnetic=atof(NMEA0183Msg.Field(0)); break;
+      default : break;
+      }
+    switch ( NMEA0183Msg.Field(3)[0] ) {
+      case 'T' : WindDirectionTrue=atof(NMEA0183Msg.Field(2)); break;
+      case 'M' : WindDirectionMagnetic=atof(NMEA0183Msg.Field(2)); break;
+      default : break;
+      }
+    switch ( NMEA0183Msg.Field(5)[0] ) {
+      case 'N' : WindSpeedkn=atof(NMEA0183Msg.Field(4)); break;
+      case 'M' : WindSpeedms=atof(NMEA0183Msg.Field(4)); break;
+      default : break;
+      }
+    switch ( NMEA0183Msg.Field(7)[0] ) {
+      case 'N' : WindSpeedkn=atof(NMEA0183Msg.Field(6)); break;
+      case 'M' : WindSpeedms=atof(NMEA0183Msg.Field(6)); break;
+      default : break;
+    }
+    return result;
+  }
+}
+
+bool NMEA0183SetMWD(tNMEA0183Msg &NMEA0183Msg, double WindDirectionTrue, double WindDirectionMagnetic, double WindSpeedkn, double WindSpeedms, const char *Src) {
+  if ( !NMEA0183Msg.Init("MWD",Src) ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(WindDirectionTrue) ) return false;
+  if ( !NMEA0183Msg.AddStrField("T") ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(WindDirectionMagnetic) ) return false;
+  if ( !NMEA0183Msg.AddStrField("M") ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(WindSpeedkn) ) return false;
+  if ( !NMEA0183Msg.AddStrField("N") ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(WindSpeedms) ) return false;
+  if ( !NMEA0183Msg.AddStrField("M") ) return false;
+  return true;
+}
+
+//*****************************************************************************
 // MTW - Water Temperature
 //$IIMTW,15.1,C*hh
 bool NMEA0183ParseMTW_nc(const tNMEA0183Msg &NMEA0183Msg,double &WaterTemperature) {
@@ -756,6 +800,28 @@ bool NMEA0183SetMTW(tNMEA0183Msg &NMEA0183Msg, double WaterTemperature, const ch
   if ( !NMEA0183Msg.Init("MTW",Src) ) return false;
   if ( !NMEA0183Msg.AddDoubleField(WaterTemperature) ) return false;
   if ( !NMEA0183Msg.AddStrField("C") ) return false;
+  return true;
+}
+
+//*****************************************************************************
+// DPT - Water Depth below transducer
+//$IIDPT,45.1,0.5,100.0*hh
+bool NMEA0183ParseDPT_nc(const tNMEA0183Msg &NMEA0183Msg,double &WaterDepth, double &Offset, double &Range) {
+  bool result=( NMEA0183Msg.FieldCount()>=2 );
+
+  if ( result ) {
+    WaterDepth=atof(NMEA0183Msg.Field(0));
+    Offset=atof(NMEA0183Msg.Field(1));
+    Range=atof(NMEA0183Msg.Field(2));
+  }
+  return result;
+}
+
+bool NMEA0183SetDPT(tNMEA0183Msg &NMEA0183Msg, double WaterDepth, double Offset, double Range, const char *Src) {
+  if ( !NMEA0183Msg.Init("MTW",Src) ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(WaterDepth) ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(Offset) ) return false;
+  if ( !NMEA0183Msg.AddDoubleField(Range) ) return false;
   return true;
 }
 
