@@ -195,11 +195,13 @@ bool NMEA0183SetGGA(tNMEA0183Msg &NMEA0183Msg, double GPSTime, double Latitude, 
 
 
 //*****************************************************************************
-bool NMEA0183ParseGLL_nc(const tNMEA0183Msg &NMEA0183Msg, tGLL &gll);
+//bool NMEA0183ParseGLL_nc(const tNMEA0183Msg &NMEA0183Msg, tGLL &gll);
+bool NMEA0183ParseGLL_nc(const tNMEA0183Msg &NMEA0183Msg, double &Latitude, double &Longitude, double &GPSTime, char &Status);
 
-inline bool NMEA0183ParseGLL(const tNMEA0183Msg &NMEA0183Msg, tGLL &gll) {
+
+inline bool NMEA0183ParseGLL(const tNMEA0183Msg &NMEA0183Msg, double &Latitude, double &Longitude, double &GPSTime, char &Status) {
   return (NMEA0183Msg.IsMessageCode("GLL")
-            ?NMEA0183ParseGLL_nc(NMEA0183Msg,gll)
+            ?NMEA0183ParseGLL_nc(NMEA0183Msg, Latitude,  Longitude, GPSTime, Status)
             :false);
 }
 
@@ -363,9 +365,21 @@ inline bool NMEA0183ParseMWV(const tNMEA0183Msg &NMEA0183Msg,double &WindAngle, 
 }
 
 bool NMEA0183SetMWV(tNMEA0183Msg &NMEA0183Msg, double WindAngle, tNMEA0183WindReference Reference, double WindSpeed, const char *Src="II");
+
+//*****************************************************************************
+// MTW - Water Temperature
+bool NMEA0183ParseMTW_nc(const tNMEA0183Msg &NMEA0183Msg,double &WaterTemperature);
+
+inline bool NMEA0183ParseMTW(const tNMEA0183Msg &NMEA0183Msg,double &WaterTemperature) {
+  return (NMEA0183Msg.IsMessageCode("MWV")
+            ?NMEA0183ParseMTW_nc(NMEA0183Msg,WaterTemperature)
+            :false);
+}
+
+bool NMEA0183SetMTW(tNMEA0183Msg &NMEA0183Msg, double WaterTemperature);
 //*****************************************************************************
 // GSV - GPS Satellites in view
-bool NMEA0183SetGSV(tNMEA0183Msg &NMEA0183Msg, uint32_t totalMSG, uint32_t thisMSG, uint32_t SatelliteCount, 
+bool NMEA0183SetGSV(tNMEA0183Msg &NMEA0183Msg, uint32_t totalMSG, uint32_t thisMSG, uint32_t SatelliteCount,
 					uint32_t PRN1, uint32_t Elevation1, uint32_t Azimuth1, uint32_t SNR1,
 					uint32_t PRN2, uint32_t Elevation2, uint32_t Azimuth2, uint32_t SNR2,
 					uint32_t PRN3, uint32_t Elevation3, uint32_t Azimuth3, uint32_t SNR3,
